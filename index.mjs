@@ -12,7 +12,6 @@ const corsOptions = {
 };
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
-ss;
 app.use(bodyParser.json());
 
 dotenv.config();
