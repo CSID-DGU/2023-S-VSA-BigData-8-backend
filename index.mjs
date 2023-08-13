@@ -200,3 +200,21 @@ app.get("/comment/check", async (req, res) => {
   res.json(result.rows);
   client.release();
 });
+
+//현재 시각의 데이터 조회
+app.get("/data/now", async (req, res) => {
+  const client = await pool.connect();
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const second = now.getSeconds();
+  const time = hour + ":" + minute + ":" + second;
+  console.log(time);
+
+  const result = await client.query(
+    `SELECT * FROM public."hanTech_data" WHERE time >= $1::time-'00:05:00' AND time < $1::time +'00:05:00' `,
+    [time]
+  );
+  res.json(result.rows);
+  client.release();
+});
