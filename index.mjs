@@ -41,6 +41,7 @@ app.get("/child", async (req, res) => {
 
 app.post("/post/create", async (req, res) => {
   const client = await pool.connect();
+  const now = new Date();
   const result = await client.query(
     `INSERT INTO public."hanTech_post" (post_id,title,nickname, content, updated_at,uploaded_at,id,view_count) VALUES ($1, $2,$3,$4,$5,$6,$7,$8)`,
     [
@@ -48,8 +49,8 @@ app.post("/post/create", async (req, res) => {
       req.body.title,
       req.body.nickname,
       req.body.content,
-      req.body.updated_at,
-      req.body.uploaded_at,
+      now,
+      now,
       req.body.id,
       req.body.view_count,
     ]
@@ -61,6 +62,7 @@ app.post("/post/create", async (req, res) => {
 
 app.post("/post/edit", async (req, res) => {
   const client = await pool.connect();
+  const now = new Date();
   const result = await client.query(
     `UPDATE public."hanTech_post" SET title = $1, content = $2, nickname = $4, updated_at=$5,uploaded_at=$6,id=$7,view_count=$8 WHERE post_id = $3`,
     [
@@ -68,7 +70,7 @@ app.post("/post/edit", async (req, res) => {
       req.body.content,
       req.body.post_id,
       req.body.nickname,
-      req.body.updated_at,
+      now,
       req.body.uploaded_at,
       req.body.id,
       req.body.view_count,
@@ -87,17 +89,27 @@ app.get("/post", async (req, res) => {
   client.release();
 });
 
-app.get("/post/find", async (req, res) => {
+// 특정 게시물 조회 API
+app.get("/posts/:postId", async (req, res) => {
+  const postId = req.params.postId;
   const client = await pool.connect();
-  const post_id = req.body.post_id;
-  const result = await client.query(
-    `SELECT * FROM public."hanTech_post" WHERE post_id = $1`,
-    [post_id]
-  );
 
-  res.json(result.rows);
-  client.release();
-}); // 게시글 조회
+  try {
+    const query = 'SELECT * FROM public."hanTech_post" WHERE post_id = $1';
+    const result = await client.query(query, [postId]);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: "Post not found." });
+    } else {
+      res.json(result.rows[0]);
+    }
+  } catch (err) {
+    console.error("Error fetching post:", err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching the post." });
+  }
+});
 
 app.delete("/post/delete", async (req, res) => {
   const client = await pool.connect();
@@ -130,8 +142,8 @@ app.post("/comment/create", async (req, res) => {
     [
       req.body.nickname,
       req.body.content,
-      req.body.updated_at,
-      req.body.uploaded_at,
+      date(),
+      date(),
       req.body.id,
       req.body.comment_id,
     ]
