@@ -87,14 +87,6 @@ app.get("/post", async (req, res) => {
   client.release();
 });
 
-app.get("/post/check", async (req, res) => {
-  const client = await pool.connect();
-  const result = await client.query(`SELECT * FROM public."hanTech_post"`);
-
-  res.json(result.rows);
-  client.release();
-});
-
 app.get("/post/find", async (req, res) => {
   const client = await pool.connect();
   const post_id = req.body.post_id;
@@ -191,10 +183,10 @@ app.get("/comment", async (req, res) => {
 // 댓글 조회
 app.get("/comment/check", async (req, res) => {
   const client = await pool.connect();
-  const comment_id = req.body.comment_id;
+  const post_id = req.body.post_id;
   const result = await client.query(
     `SELECT * FROM public."hanTech_comment" WHERE comment_id = $1`,
-    [comment_id]
+    [post_id]
   );
 
   res.json(result.rows);
