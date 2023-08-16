@@ -126,7 +126,7 @@ app.get("/post/check", async (req, res) => {
   try {
     const result = await client.query(
       `SELECT * FROM public."hanTech_post" WHERE post_id = $1`,
-      [req.body.postId]
+      [req.body.post_id]
     );
 
     if (result.rows.length === 0) {
@@ -147,7 +147,7 @@ app.delete("/post/delete", async (req, res) => {
   try {
     const result = await client.query(
       `DELETE FROM public."hanTech_post" WHERE post_id = $1`,
-      [req.body.postId]
+      [req.body.post_id]
     );
     res.json(result.rows);
     client.release();
@@ -165,7 +165,7 @@ app.post("/post/increase-views", async (req, res) => {
   try {
     const result = await client.query(
       `UPDATE public."hanTech_post" SET view_count = view_count + 1 WHERE post_id = $1`,
-      [req.body.postId]
+      [req.body.post_id]
     );
     res.json(result.rows);
     client.release();
@@ -183,7 +183,7 @@ app.post("/comment/create", async (req, res) => {
   try {
     const result = await client.query(
       `INSERT INTO public."hanTech_comment" (nickname, content, id, post_id) VALUES ($1, $2,$3,$4)`,
-      [req.body.nickname, req.body.content, req.body.id, req.body.postId]
+      [req.body.nickname, req.body.content, req.body.id, req.body.post_id]
     );
     res.json(result.rows);
     client.release();
@@ -210,7 +210,7 @@ app.post("/comment/edit", async (req, res) => {
   try {
     const result = await client.query(
       `UPDATE public."hanTech_comment" SET content = $1, uploaded_at=$3 WHERE comment_id = $2ss`,
-      [req.body.content, req.body.commentId, timestamp]
+      [req.body.content, req.body.comment_id, timestamp]
     );
 
     res.json(result.rows);
@@ -229,7 +229,7 @@ app.delete("/comment/delete", async (req, res) => {
   try {
     const result = await client.query(
       `DELETE FROM public."hanTech_comment" WHERE comment_id = $1`,
-      [req.body.commentId]
+      [req.body.comment_id]
     );
     res.json(result.rows);
     client.release();
@@ -258,7 +258,7 @@ app.get("/comment", async (req, res) => {
 // 댓글 조회
 app.get("/comment/check", async (req, res) => {
   const client = await pool.connect();
-  const post_id = req.body.postId;
+  const post_id = req.body.post_id;
   try {
     const result = await client.query(
       `SELECT * FROM public."hanTech_comment" WHERE comment_id = $1`,
