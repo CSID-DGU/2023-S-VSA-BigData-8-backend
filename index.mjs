@@ -51,14 +51,8 @@ app.post("/post/create", async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      `INSERT INTO public."hanTech_post" (post_id,title,nickname, content, id) VALUES ($1, $2,$3,$4,$5)`,
-      [
-        req.body.post_id,
-        req.body.title,
-        req.body.nickname,
-        req.body.content,
-        req.body.id,
-      ]
+      `INSERT INTO public."hanTech_post" (title,nickname, content, id) VALUES ($1, $2,$3,$4)`,
+      [req.body.title, req.body.nickname, req.body.content, req.body.id]
     );
 
     res.json(result.rows);
