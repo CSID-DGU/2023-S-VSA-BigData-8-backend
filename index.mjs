@@ -124,8 +124,10 @@ app.get("/post/check", async (req, res) => {
   const client = await pool.connect();
 
   try {
-    const query = 'SELECT * FROM public."hanTech_post" WHERE post_id = $1';
-    const result = await client.query(query, Int16Array[req.body.postId]);
+    const result = await client.query(
+      `SELECT * FROM public."hanTech_post" WHERE post_id = $1`,
+      [req.body.postId]
+    );
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: "Post not found." });
