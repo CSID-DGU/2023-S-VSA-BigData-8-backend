@@ -41,20 +41,21 @@ app.get("/child", async (req, res) => {
 
 app.post("/post/create", async (req, res) => {
   const client = await pool.connect();
-  const now = new Date();
   const result = await client.query(
-    `INSERT INTO public."hanTech_post" (post_id,title,nickname, content, updated_at,uploaded_at,id,view_count) VALUES ($1, $2,$3,$4,$5,$6,$7,$8)`,
+    `INSERT INTO public."hanTech_post" (post_id,title,nickname, content, id) VALUES ($1, $2,$3,$4,$5)`,
     [
       req.body.post_id,
       req.body.title,
       req.body.nickname,
       req.body.content,
-      now,
-      now,
       req.body.id,
-      req.body.view_count,
     ]
   );
+
+  process.on("uncaughtException", (err) => {
+    console.log("whoops! there was an error");
+    console.log(err);
+  });
 
   res.json(result.rows);
   client.release();
@@ -63,17 +64,23 @@ app.post("/post/create", async (req, res) => {
 app.post("/post/edit", async (req, res) => {
   const client = await pool.connect();
   const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const date = now.getDate();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const second = now.getSeconds();
+  const timestamp =
+    year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
   const result = await client.query(
-    `UPDATE public."hanTech_post" SET title = $1, content = $2, nickname = $4, updated_at=$5,uploaded_at=$6,id=$7,view_count=$8 WHERE post_id = $3`,
+    `UPDATE public."hanTech_post" SET title = $1, content = $2, nickname = $4, id=$5, uploaded_at=$6 WHERE post_id = $3`,
     [
       req.body.title,
       req.body.content,
       req.body.post_id,
       req.body.nickname,
-      now,
-      req.body.uploaded_at,
       req.body.id,
-      req.body.view_count,
+      timestamp,
     ]
   );
 
@@ -135,19 +142,18 @@ app.post("/post/increase-views", async (req, res) => {
 });
 
 // 댓글 생성
-app.post("/comment/create", async (req, res) => {
+app.post("/comment/create/:post_Id", async (req, res) => {
+  const postId = req.params.post_Id;
   const client = await pool.connect();
   const result = await client.query(
-    `INSERT INTO public."hanTech_comment" (nickname, content, updated_at,uploaded_at,id,comment_id) VALUES ($1, $2,$3,$4,$5,$6)`,
-    [
-      req.body.nickname,
-      req.body.content,
-      date(),
-      date(),
-      req.body.id,
-      req.body.comment_id,
-    ]
+    `INSERT INTO public."hanTech_comment" (nickname, content, id, post_id) VALUES ($1, $2,$3,$4)`,
+    [req.body.nickname, req.body.content, req.body.id, postId]
   );
+
+  process.on("uncaughtException", (err) => {
+    console.log("whoops! there was an error");
+    console.log(err);
+  });
 
   res.json(result.rows);
   client.release();
@@ -156,16 +162,18 @@ app.post("/comment/create", async (req, res) => {
 // 댓글 수정
 app.post("/comment/edit", async (req, res) => {
   const client = await pool.connect();
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const date = now.getDate();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const second = now.getSeconds();
+  const timestamp =
+    year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
   const result = await client.query(
-    `UPDATE public."hanTech_comment" SET nickname = $1, content = $2, updated_at=$3, uploaded_at=$4, id=$5, comment_id=$6 WHERE comment_id = $3`,
-    [
-      req.body.nickname,
-      req.body.content,
-      req.body.comment_id,
-      req.body.updated_at,
-      req.body.uploaded_at,
-      req.body.id,
-    ]
+    `UPDATE public."hanTech_comment" SET content = $1, uploaded_at=$3 WHERE comment_id = $2ss`,
+    [req.body.content, req.body.comment_id, timestamp]
   );
 
   res.json(result.rows);
