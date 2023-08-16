@@ -33,32 +33,42 @@ app.get("/", (req, res) => {
 
 app.get("/child", async (req, res) => {
   const client = await pool.connect();
-  const result = await client.query(`SELECT * FROM public."hanTech_data"`);
+  try {
+    const result = await client.query(`SELECT * FROM public."hanTech_data"`);
 
-  res.json(result.rows);
-  client.release();
+    res.json(result.rows);
+    client.release();
+  } catch (err) {
+    console.error("Error fetching hantech data:", err);
+    res
+
+      .status(401)
+      .json({ error: "An error occurred while fetching the hantech data." });
+  }
 });
 
 app.post("/post/create", async (req, res) => {
   const client = await pool.connect();
-  const result = await client.query(
-    `INSERT INTO public."hanTech_post" (post_id,title,nickname, content, id) VALUES ($1, $2,$3,$4,$5)`,
-    [
-      req.body.post_id,
-      req.body.title,
-      req.body.nickname,
-      req.body.content,
-      req.body.id,
-    ]
-  );
+  try {
+    const result = await client.query(
+      `INSERT INTO public."hanTech_post" (post_id,title,nickname, content, id) VALUES ($1, $2,$3,$4,$5)`,
+      [
+        req.body.post_id,
+        req.body.title,
+        req.body.nickname,
+        req.body.content,
+        req.body.id,
+      ]
+    );
 
-  process.on("uncaughtException", (err) => {
-    console.log("whoops! there was an error");
-    console.log(err);
-  });
-
-  res.json(result.rows);
-  client.release();
+    res.json(result.rows);
+    client.release();
+  } catch (err) {
+    console.error("Error fetching post:", err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching the post." });
+  }
 });
 
 app.post("/post/edit", async (req, res) => {
@@ -72,20 +82,27 @@ app.post("/post/edit", async (req, res) => {
   const second = now.getSeconds();
   const timestamp =
     year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
-  const result = await client.query(
-    `UPDATE public."hanTech_post" SET title = $1, content = $2, nickname = $4, id=$5, uploaded_at=$6 WHERE post_id = $3`,
-    [
-      req.body.title,
-      req.body.content,
-      req.body.post_id,
-      req.body.nickname,
-      req.body.id,
-      timestamp,
-    ]
-  );
+  try {
+    const result = await client.query(
+      `UPDATE public."hanTech_post" SET title = $1, content = $2, nickname = $4, id=$5, uploaded_at=$6 WHERE post_id = $3`,
+      [
+        req.body.title,
+        req.body.content,
+        req.body.post_id,
+        req.body.nickname,
+        req.body.id,
+        timestamp,
+      ]
+    );
 
-  res.json(result.rows);
-  client.release();
+    res.json(result.rows);
+    client.release();
+  } catch (err) {
+    console.error("Error fetching post:", err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching the post." });
+  }
 });
 
 app.get("/post", async (req, res) => {
@@ -103,13 +120,12 @@ app.get("/post", async (req, res) => {
 });
 
 // 특정 게시물 조회 API
-app.get("/posts/:postId", async (req, res) => {
-  const postId = req.params.postId;
+app.get("/post/check", async (req, res) => {
   const client = await pool.connect();
 
   try {
     const query = 'SELECT * FROM public."hanTech_post" WHERE post_id = $1';
-    const result = await client.query(query, [postId]);
+    const result = await client.query(query, [req.body.post_id]);
 
     if (result.rows.length === 0) {
       res.status(404).json({ error: "Post not found." });
@@ -170,10 +186,10 @@ app.post("/comment/create", async (req, res) => {
     res.json(result.rows);
     client.release();
   } catch (err) {
-    console.error("Error fetching post:", err);
+    console.error("Error fetching comment:", err);
     res
-      .status(500)
-      .json({ error: "An error occurred while fetching the post." });
+      .status(501)
+      .json({ error: "An error occurred while fetching the comment." });
   }
 });
 
@@ -198,10 +214,10 @@ app.post("/comment/edit", async (req, res) => {
     res.json(result.rows);
     client.release();
   } catch (err) {
-    console.error("Error fetching post:", err);
+    console.error("Error fetching comment:", err);
     res
-      .status(500)
-      .json({ error: "An error occurred while fetching the post." });
+      .status(501)
+      .json({ error: "An error occurred while fetching the comment." });
   }
 });
 
@@ -216,10 +232,10 @@ app.delete("/comment/delete", async (req, res) => {
     res.json(result.rows);
     client.release();
   } catch (err) {
-    console.error("Error fetching post:", err);
+    console.error("Error fetching comment:", err);
     res
-      .status(500)
-      .json({ error: "An error occurred while fetching the post." });
+      .status(501)
+      .json({ error: "An error occurred while fetching the comment." });
   }
 });
 
@@ -230,11 +246,10 @@ app.get("/comment", async (req, res) => {
     res.json(result.rows);
     client.release();
   } catch (err) {
-    console.error("Error fetching post:", err);
+    console.error("Error fetching comment:", err);
     res
-
-      .status(500)
-      .json({ error: "An error occurred while fetching the post." });
+      .status(501)
+      .json({ error: "An error occurred while fetching the comment." });
   }
 });
 
@@ -251,10 +266,10 @@ app.get("/comment/check", async (req, res) => {
     res.json(result.rows);
     client.release();
   } catch (err) {
-    console.error("Error fetching post:", err);
+    console.error("Error fetching comment:", err);
     res
-      .status(500)
-      .json({ error: "An error occurred while fetching the post." });
+      .status(501)
+      .json({ error: "An error occurred while fetching the comment." });
   }
 });
 
@@ -275,10 +290,10 @@ app.get("/data/now", async (req, res) => {
     res.json(result.rows);
     client.release();
   } catch (err) {
-    console.error("Error fetching post:", err);
+    console.error("Error fetching hantech data:", err);
     res
 
-      .status(500)
-      .json({ error: "An error occurred while fetching the post." });
+      .status(401)
+      .json({ error: "An error occurred while fetching the hantech data." });
   }
 });
