@@ -126,7 +126,7 @@ app.get("/post/check", async (req, res) => {
   try {
     const result = await client.query(
       `SELECT * FROM public."hanTech_post" WHERE post_id = $1`,
-      [req.body.post_id]
+      [req.query.post_id]
     );
 
     if (result.rows.length === 0) {
@@ -258,7 +258,7 @@ app.get("/comment", async (req, res) => {
 // 댓글 조회
 app.get("/comment/check", async (req, res) => {
   const client = await pool.connect();
-  const post_id = req.body.post_id;
+  const post_id = req.query.post_id;
   try {
     const result = await client.query(
       `SELECT * FROM public."hanTech_comment" WHERE comment_id = $1`,
