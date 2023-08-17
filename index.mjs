@@ -55,7 +55,7 @@ app.post("/post/create", async (req, res) => {
       [req.body.title, req.body.nickname, req.body.content, req.body.id]
     );
 
-    res.json(result.rows);
+    res.json(result.rows.sort((a, b) => b.post_id - a.post_id)[0]);
     client.release();
   } catch (err) {
     console.error("Error fetching post:", err);
@@ -259,7 +259,7 @@ app.get("/comment/check", async (req, res) => {
       [post_id]
     );
 
-    res.json(result.rows);
+    res.json(result.rows.sort((a, b) => b.comment_id - a.comment_id)[0]);
     client.release();
   } catch (err) {
     console.error("Error fetching comment:", err);
