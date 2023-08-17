@@ -255,7 +255,7 @@ app.get("/comment/check", async (req, res) => {
   const post_id = req.query.post_id;
   try {
     const result = await client.query(
-      `SELECT * FROM public."hanTech_comment" WHERE comment_id = $1`,
+      `SELECT * FROM public."hanTech_comment" WHERE post_id = $1`,
       [post_id]
     );
 
