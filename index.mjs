@@ -207,7 +207,7 @@ app.post("/comment/edit", async (req, res) => {
     year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
   try {
     const result = await client.query(
-      `UPDATE public."hanTech_comment" SET content = $1, updated_at=$3 WHERE comment_id = $2ss`,
+      `UPDATE public."hanTech_comment" SET content = $1, updated_at=$3 WHERE comment_id = $2`,
       [req.body.content, req.body.comment_id, timestamp]
     );
 
