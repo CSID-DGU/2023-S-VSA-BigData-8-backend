@@ -10,7 +10,7 @@ const corsOptions = {
   origin: true,
   credentials: true,
 };
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -42,7 +42,7 @@ app.get("/child", async (req, res) => {
     console.error("Error fetching hantech data:", err);
     res
 
-      .status(401)
+      .status(500)
       .json({ error: "An error occurred while fetching the hantech data." });
   }
 });
@@ -184,7 +184,7 @@ app.post("/comment/create", async (req, res) => {
   } catch (err) {
     console.error("Error fetching comment:", err);
     res
-      .status(501)
+      .status(500)
       .json({ error: "An error occurred while fetching the comment." });
   }
 });
@@ -212,7 +212,7 @@ app.post("/comment/edit", async (req, res) => {
   } catch (err) {
     console.error("Error fetching comment:", err);
     res
-      .status(501)
+      .status(500)
       .json({ error: "An error occurred while fetching the comment." });
   }
 });
@@ -230,7 +230,7 @@ app.delete("/comment/delete", async (req, res) => {
   } catch (err) {
     console.error("Error fetching comment:", err);
     res
-      .status(501)
+      .status(500)
       .json({ error: "An error occurred while fetching the comment." });
   }
 });
@@ -244,7 +244,7 @@ app.get("/comment", async (req, res) => {
   } catch (err) {
     console.error("Error fetching comment:", err);
     res
-      .status(501)
+      .status(500)
       .json({ error: "An error occurred while fetching the comment." });
   }
 });
@@ -264,7 +264,7 @@ app.get("/comment/check", async (req, res) => {
   } catch (err) {
     console.error("Error fetching comment:", err);
     res
-      .status(501)
+      .status(500)
       .json({ error: "An error occurred while fetching the comment." });
   }
 });
@@ -289,7 +289,7 @@ app.get("/data/now", async (req, res) => {
     console.error("Error fetching hantech data:", err);
     res
 
-      .status(401)
+      .status(500)
       .json({ error: "An error occurred while fetching the hantech data." });
   }
 });
