@@ -140,10 +140,14 @@ app.delete("/post/delete", async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query(
+      `DELETE FROM public."hanTech_comment" WHERE post_id = $1`,
+      [req.query.post_id]
+    );
+    const result2 = await client.query(
       `DELETE FROM public."hanTech_post" WHERE post_id = $1`,
       [req.query.post_id]
     );
-    res.json(result.rows);
+    res.json(result2.rows);
     client.release();
   } catch (err) {
     console.error("Error fetching post:", err);
