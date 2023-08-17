@@ -78,7 +78,7 @@ app.post("/post/edit", async (req, res) => {
     year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
   try {
     const result = await client.query(
-      `UPDATE public."hanTech_post" SET title = $1, content = $2, nickname = $4, id=$5, uploaded_at=$6 WHERE post_id = $3`,
+      `UPDATE public."hanTech_post" SET title = $1, content = $2, nickname = $4, id=$5, updated_at=$6 WHERE post_id = $3`,
       [
         req.body.title,
         req.body.content,
@@ -141,7 +141,7 @@ app.delete("/post/delete", async (req, res) => {
   try {
     const result = await client.query(
       `DELETE FROM public."hanTech_post" WHERE post_id = $1`,
-      [req.body.post_id]
+      [req.query.post_id]
     );
     res.json(result.rows);
     client.release();
@@ -203,7 +203,7 @@ app.post("/comment/edit", async (req, res) => {
     year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
   try {
     const result = await client.query(
-      `UPDATE public."hanTech_comment" SET content = $1, uploaded_at=$3 WHERE comment_id = $2ss`,
+      `UPDATE public."hanTech_comment" SET content = $1, updated_at=$3 WHERE comment_id = $2ss`,
       [req.body.content, req.body.comment_id, timestamp]
     );
 
@@ -223,7 +223,7 @@ app.delete("/comment/delete", async (req, res) => {
   try {
     const result = await client.query(
       `DELETE FROM public."hanTech_comment" WHERE comment_id = $1`,
-      [req.body.comment_id]
+      [req.query.comment_id]
     );
     res.json(result.rows);
     client.release();
