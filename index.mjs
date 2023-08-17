@@ -103,7 +103,7 @@ app.get("/post", async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query(`SELECT * FROM public."hanTech_post"`);
-    res.json(result.rows);
+    res.json(result.rows.sort((a, b) => b.post_id - a.post_id));
     client.release();
   } catch (err) {
     console.error("Error fetching post:", err);
@@ -259,7 +259,7 @@ app.get("/comment/check", async (req, res) => {
       [post_id]
     );
 
-    res.json(result.rows.sort((a, b) => b.comment_id - a.comment_id)[0]);
+    res.json(result.rows.sort((a, b) => b.comment_id - a.comment_id));
     client.release();
   } catch (err) {
     console.error("Error fetching comment:", err);
