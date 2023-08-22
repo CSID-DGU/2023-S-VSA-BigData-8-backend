@@ -285,10 +285,15 @@ app.get("/data/now", async (req, res) => {
   console.log(time);
   try {
     const result = await client.query(
-      `SELECT * FROM public."hanTech_data" WHERE time = $1 - (EXTRACT(minute FROM $1)::int % 10) * interval '1 minute' AS truncated_time AND name = $2`,
-      [time, region]
+      `SELECT *
+      FROM public."hanTech_data"
+      WHERE 
+          time = $1 - $3::int % 10 * interval '1 minute' - $4::int * interval '1 second'
+          AND name = $2`,
+      [time, region, minute, second]
     );
     res.json(result.rows[0]);
+    console.log(result.rows[0]);
     client.release();
   } catch (err) {
     console.error("Error fetching hantech data:", err);
@@ -299,7 +304,7 @@ app.get("/data/now", async (req, res) => {
   }
 });
 
-//누적 데이터 조회
+//6시부터 지금시간까지의 데이터 조회
 app.get("/data/accumulate", async (req, res) => {
   const region = req.query.region;
   const client = await pool.connect();
@@ -329,20 +334,26 @@ app.get("/data/accumulate", async (req, res) => {
 app.get("/data/nowTotal", async (req, res) => {
   const region = req.query.region;
   const client = await pool.connect();
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const second = now.getSeconds();
+  const time = hour + ":" + minute + ":" + second;
   const result = await client.query(
     `SELECT * FROM public."hanTech_data" WHERE time <=$1 AND name = $2`,
     [time, region]
   );
-  const today_max = result.rows.sort(
+  const sortedRows = result.rows.sort(
     (a, b) => b.car_speed_max - a.car_speed_max
-  )[-1].car_speed_max;
-  const car_total = 0;
+  );
+  const today_max = sortedRows[0].car_speed_max; // 가장 큰 최대 속도 값
+  let car_total = 0;
   for (let i = 0; i < result.rows.length; i++) {
-    car_total += result.rows[i].car_count;
+    car_total = car_total + result.rows[i].car_count;
   }
-  const people_total = 0;
+  let people_total = 0;
   for (let i = 0; i < result.rows.length; i++) {
-    people_total += result.rows[i].people_count;
+    people_total = people_total + result.rows[i].people_count;
   }
   res.json({
     today_max: today_max,
