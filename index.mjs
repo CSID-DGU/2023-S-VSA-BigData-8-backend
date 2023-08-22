@@ -292,8 +292,30 @@ app.get("/data/now", async (req, res) => {
           AND name = $2`,
       [time, region, minute, second]
     );
-    res.json(result.rows[0]);
-    console.log(result.rows[0]);
+    let Car = result.rows[0].car_count;
+    let People = result.rows[0].people_count;
+    let Car_speed_max = result.rows[0].car_speed_max;
+    let Car_speed_avg = result.rows[0].car_speed_mean;
+    let Safety =
+      10000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg));
+    res.json(
+      result.rows[0].time,
+      result.rows[0].name,
+      result.rows[0].car_count,
+      result.rows[0].car_speed_max,
+      result.rows[0].car_speed_mean,
+      result.rows[0].people_count,
+      Safety
+    );
+    console.log(
+      result.rows[0].time,
+      result.rows[0].name,
+      result.rows[0].car_count,
+      result.rows[0].car_speed_max,
+      result.rows[0].car_speed_mean,
+      result.rows[0].people_count,
+      Safety
+    );
     client.release();
   } catch (err) {
     console.error("Error fetching hantech data:", err);
