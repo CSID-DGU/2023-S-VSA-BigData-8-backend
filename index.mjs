@@ -341,7 +341,25 @@ app.get("/data/accumulate", async (req, res) => {
       `SELECT * FROM public."hanTech_data" WHERE time <=$1 AND name = $2`,
       [time, region]
     );
-    res.json(result.rows);
+    const Safety = [];
+    for (let i = 0; i < result.rows.length; i++) {
+      let Car = result.rows[i].car_count;
+      let People = result.rows[i].people_count;
+      let Car_speed_max = result.rows[i].car_speed_max;
+      let Car_speed_avg = result.rows[i].car_speed_mean;
+      Safety.push(
+        10000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg))
+      );
+    }
+    res.json(
+      result.rows.time,
+      result.rows.name,
+      result.rows.car_count,
+      result.rows.car_speed_max,
+      result.rows.car_speed_mean,
+      result.rows.people_count,
+      Safety
+    );
     client.release();
   } catch (err) {
     console.error("Error fetching hantech data:", err);
