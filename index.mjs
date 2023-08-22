@@ -285,7 +285,7 @@ app.get("/data/now", async (req, res) => {
   console.log(time);
   try {
     const result = await client.query(
-      `SELECT * FROM public."hanTech_data" WHERE time >= $1::time-'00:05:00' AND time < $1::time +'00:05:00' AND name = $2`,
+      `SELECT * FROM public."hanTech_data" WHERE time = $1 - (EXTRACT(minute FROM $1)::int % 10) * interval '1 minute' AS truncated_time AND name = $2`,
       [time, region]
     );
     res.json(result.rows[0]);
@@ -327,6 +327,7 @@ app.get("/data/accumulate", async (req, res) => {
 
 //오늘최고속도, 누적보행자수, 누적차량수
 app.get("/data/nowTotal", async (req, res) => {
+  const region = req.query.region;
   const client = await pool.connect();
   const result = await client.query(
     `SELECT * FROM public."hanTech_data" WHERE time <=$1 AND name = $2`,
