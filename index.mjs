@@ -298,24 +298,9 @@ app.get("/data/now", async (req, res) => {
     let Car_speed_avg = result.rows[0].car_speed_mean;
     let Safety =
       10000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg));
-    res.json(
-      result.rows[0].time,
-      result.rows[0].name,
-      result.rows[0].car_count,
-      result.rows[0].car_speed_max,
-      result.rows[0].car_speed_mean,
-      result.rows[0].people_count,
-      Safety
-    );
-    console.log(
-      result.rows[0].time,
-      result.rows[0].name,
-      result.rows[0].car_count,
-      result.rows[0].car_speed_max,
-      result.rows[0].car_speed_mean,
-      result.rows[0].people_count,
-      Safety
-    );
+    result.rows[0].safety = Safety;
+    res.json(result.rows[0]);
+    console.log(result.rows[0]);
     client.release();
   } catch (err) {
     console.error("Error fetching hantech data:", err);
@@ -348,18 +333,13 @@ app.get("/data/accumulate", async (req, res) => {
       let Car_speed_max = result.rows[i].car_speed_max;
       let Car_speed_avg = result.rows[i].car_speed_mean;
       Safety.push(
-        10000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg))
+        1000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg))
       );
     }
-    res.json(
-      result.rows.time,
-      result.rows.name,
-      result.rows.car_count,
-      result.rows.car_speed_max,
-      result.rows.car_speed_mean,
-      result.rows.people_count,
-      Safety
-    );
+    for (let i = 0; i < result.rows.length; i++) {
+      result.rows[i].safety = Safety[i];
+    }
+    res.json(result.rows);
     client.release();
   } catch (err) {
     console.error("Error fetching hantech data:", err);
