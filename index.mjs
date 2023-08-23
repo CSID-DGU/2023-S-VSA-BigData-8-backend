@@ -292,35 +292,9 @@ app.get("/data/now", async (req, res) => {
           AND name = $2`,
       [time, region, minute, second]
     );
-    let Car = result.rows[0].car_count;
-    let People = result.rows[0].people_count;
-    let Car_speed_max = result.rows[0].car_speed_max;
-    let Car_speed_avg = result.rows[0].car_speed_mean;
-    let Safety =
-      10000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg));
-    function truncateDecimal(number) {
-      return parseInt(number, 10);
-    }
-    for (let i = 0; i < Safety.length; i++) {
-      Safety[i] = truncateDecimal(Safety[i]);
-    }
 
-    for (let i = 0; i < result.rows.length; i++) {
-      await client.query(
-        `Update public."hanTech_data" SET safety = $1 WHERE time = $2 AND name = $3`,
-        [Safety[i], result.rows[i].time, region]
-      );
-    }
     res.json(result.rows[0]);
-    console.log(
-      result.rows[0].time,
-      result.rows[0].name,
-      result.rows[0].car_count,
-      result.rows[0].car_speed_max,
-      result.rows[0].car_speed_mean,
-      result.rows[0].people_count,
-      Safety
-    );
+
     client.release();
   } catch (err) {
     console.error("Error fetching hantech data:", err);
@@ -346,33 +320,7 @@ app.get("/data/accumulate", async (req, res) => {
       `SELECT * FROM public."hanTech_data" WHERE time <=$1 AND name = $2`,
       [time, region]
     );
-    const Safety = [];
-    for (let i = 0; i < result.rows.length; i++) {
-      let Car = result.rows[i].car_count;
-      let People = result.rows[i].people_count;
-      let Car_speed_max = result.rows[i].car_speed_max;
-      let Car_speed_avg = result.rows[i].car_speed_mean;
-      Safety.push(
-        1000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg))
-      );
-    }
-    function truncateDecimal(number) {
-      return parseInt(number, 10);
-    }
-    for (let i = 0; i < Safety.length; i++) {
-      Safety[i] = truncateDecimal(Safety[i]);
-    }
 
-    for (let i = 0; i < result.rows.length; i++) {
-      await client.query(
-        `Update public."hanTech_data" SET safety = $1 WHERE time = $2 AND name = $3`,
-        [Safety[i], result.rows[i].time, region]
-      );
-    }
-
-    for (let i = 0; i < result.rows.length; i++) {
-      result.rows[i].safety = Safety[i];
-    }
     res.json(result.rows);
     client.release();
   } catch (err) {
@@ -415,88 +363,4 @@ app.get("/data/nowTotal", async (req, res) => {
     people_total: people_total,
   });
   client.release();
-});
-
-app.get("/data/now/safety", async (req, res) => {
-  const region = req.query.region;
-  const client = await pool.connect();
-  const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  const second = now.getSeconds();
-  const time = hour + ":" + minute + ":" + second;
-  console.log(time);
-  try {
-    const result = await client.query(
-      `SELECT *
-      FROM public."hanTech_data"
-      WHERE
-          time = $1 - $3::int % 10 * interval '1 minute' - $4::int * interval '1 second'
-          AND name = $2`,
-      [time, region, minute, second]
-    );
-    let Car = result.rows[0].car_count;
-    let People = result.rows[0].people_count;
-    let Car_speed_max = result.rows[0].car_speed_max;
-    let Car_speed_avg = result.rows[0].car_speed_mean;
-    const Safety =
-      10000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg));
-    function truncateDecimal(number) {
-      return parseInt(number, 10);
-    }
-
-    Safety = truncateDecimal(Safety);
-
-    res.json({ safety: Safety });
-    client.release();
-  } catch (err) {
-    console.error("Error fetching hantech data:", err);
-    res
-
-      .status(500)
-      .json({ error: "An error occurred while fetching the hantech data." });
-  }
-});
-
-//6시부터 지금시간까지의 안전도 데이터 조회
-app.get("/data/accumulate/safety", async (req, res) => {
-  const region = req.query.region;
-  const client = await pool.connect();
-  const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  const second = now.getSeconds();
-  const time = hour + ":" + minute + ":" + second;
-  console.log(time);
-  try {
-    const result = await client.query(
-      `SELECT * FROM public."hanTech_data" WHERE time <=$1 AND name = $2`,
-      [time, region]
-    );
-    const Safety = [];
-    for (let i = 0; i < result.rows.length; i++) {
-      let Car = result.rows[i].car_count;
-      let People = result.rows[i].people_count;
-      let Car_speed_max = result.rows[i].car_speed_max;
-      let Car_speed_avg = result.rows[i].car_speed_mean;
-      Safety.push(
-        1000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg))
-      );
-    }
-    function truncateDecimal(number) {
-      return parseInt(number, 10);
-    }
-    for (let i = 0; i < Safety.length; i++) {
-      Safety[i] = truncateDecimal(Safety[i]);
-    }
-
-    res.json({ safety: Safety });
-    client.release();
-  } catch (err) {
-    console.error("Error fetching hantech data:", err);
-    res
-
-      .status(500)
-      .json({ error: "An error occurred while fetching the hantech data." });
-  }
 });
