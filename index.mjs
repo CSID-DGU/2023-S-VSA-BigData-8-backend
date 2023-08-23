@@ -298,9 +298,22 @@ app.get("/data/now", async (req, res) => {
     let Car_speed_avg = result.rows[0].car_speed_mean;
     let Safety =
       10000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg));
-    result.rows[0].safety = Safety;
+    function truncateDecimal(number) {
+      return parseInt(number, 10);
+    }
+    for (let i = 0; i < Safety.length; i++) {
+      Safety[i] = truncateDecimal(Safety[i]);
+    }
     res.json(result.rows[0]);
-    console.log(result.rows[0]);
+    console.log(
+      result.rows[0].time,
+      result.rows[0].name,
+      result.rows[0].car_count,
+      result.rows[0].car_speed_max,
+      result.rows[0].car_speed_mean,
+      result.rows[0].people_count,
+      Safety
+    );
     client.release();
   } catch (err) {
     console.error("Error fetching hantech data:", err);
@@ -335,6 +348,12 @@ app.get("/data/accumulate", async (req, res) => {
       Safety.push(
         1000000 / ((Car + 1) * (People + 1) * (Car_speed_max + Car_speed_avg))
       );
+    }
+    function truncateDecimal(number) {
+      return parseInt(number, 10);
+    }
+    for (let i = 0; i < Safety.length; i++) {
+      Safety[i] = truncateDecimal(Safety[i]);
     }
     for (let i = 0; i < result.rows.length; i++) {
       result.rows[i].safety = Safety[i];
